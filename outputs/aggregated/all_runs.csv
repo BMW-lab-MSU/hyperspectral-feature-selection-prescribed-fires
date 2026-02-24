@@ -1,0 +1,2 @@
+dataset,method,band_mode,top_k,model,OA,kappa,precision_macro,recall_macro,f1_macro,best_val_acc,conf_mat_path,extra_info
+paviaU,none,no_selection,0,RF,,,,,,,,seed=0
