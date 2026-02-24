@@ -65,6 +65,8 @@ The workflow implemented in this repository follows the unified architecture des
 
 Raw hyperspectral cubes are loaded and prepared for analysis.
 
+
+
 ### 2. Exploratory Data Analysis (Optional)
 
 When enabled, the EDA pipeline performs:
@@ -129,8 +131,9 @@ hyperspectral-band-selection-prescribed-fires/
 │   ├── processed/
 │   └── metadata/
 │
+
 ├── src/
-│   ├── preprocessing/
+│   ├── eda/
 │   │   ├── eda_pipeline.py
 │   │   ├── noisy_band_detection.py
 │   │   ├── normalization.py
@@ -142,12 +145,17 @@ hyperspectral-band-selection-prescribed-fires/
 │   │   ├── srpa.py
 │   │   └── drl.py
 │   │
-│   ├── classification/
+│   ├── training/
 │   │   ├── rf.py
 │   │   ├── svm.py
 │   │   ├── knn.py
 │   │   └── cnn3d.py
 │   │
+|   ├── datasets/
+|   |
+|   ├── utils/
+|   |
+|   |
 │   ├── evaluation/
 │   │   ├── metrics.py
 │   │   ├── confusion_matrix.py
@@ -189,3 +197,47 @@ pip install -r requirements.txt
 python src/main.py --dataset indian_pines --eda True --method SRPA --topk 20
 ```
 ---
+## Data Setup
+
+After downloading datasets, place them under:
+
+data/processed/
+
+Expected filenames:
+
+- paviaU_clean.npy
+- paviaU_gt.npy
+- indian_pines_clean.npy
+- indian_pines_gt.npy
+- ...
+
+Each dataset must contain:
+- Clean hyperspectral cube: (H, W, B)
+- Ground truth map: (H, W)
+
+Band selection order files must exist in the project root:
+
+{dataset}_{method}_band_selection_results/
+    {dataset}_{method}_order.npy
+
+  ---
+  ## Reproducibility
+
+- Fixed random seeds for all experiments
+- Stratified train/test split
+- Band order files generated once per dataset
+- All results logged to:
+
+outputs/aggregated/all_runs.csv
+
+Each row corresponds to one dataset–method–model–topk configuration.
+---
+## Data Availability
+
+Public benchmark datasets (Indian Pines, Pavia University, Salinas, Botswana, KSC)
+are available from their respective repositories.
+
+The Montana UAV VNIR dataset (97GB) is part of the NSF SMART FIRES project and
+is available upon reasonable request.
+---
+
