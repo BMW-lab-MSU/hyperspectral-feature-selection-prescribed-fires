@@ -1,0 +1,257 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:13px;color:var(--color-text-primary);padding:1rem 0}
+h2{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
+.subtitle{font-size:12px;color:var(--color-text-secondary);margin-bottom:10px}
+.section{margin-bottom:2rem}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-secondary);margin:10px 0 4px}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{background:var(--color-background-secondary);font-weight:500;padding:5px 6px;text-align:left;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:11px}
+td{padding:5px 6px;border:0.5px solid var(--color-border-tertiary);vertical-align:middle;word-break:break-word}
+tr:hover td{background:var(--color-background-secondary)}
+.best{background:var(--color-background-success)!important}
+.pos{color:var(--color-text-success)}
+.neg{color:var(--color-text-danger)}
+.zero{color:var(--color-text-secondary)}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.nav button{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer}
+.nav button.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.tblock{display:none}.tblock.show{display:block}
+.divider{border-top:0.5px solid var(--color-border-tertiary);margin:12px 0}
+</style>
+
+<div class="nav" id="nav"></div>
+<div id="content"></div>
+
+<script>
+const METHODS = ['No Band Sel.','PCA','SSEP','SRPA','DRL'];
+
+const DATA = {
+  'Table 2: Indian Pines': {
+    eda:[
+      ['No Band Sel.','All | SVM',87.96748,0,0.86212,0,87.61336,0,6],
+      ['PCA','Top 50 | RF',77.59350,0,0.74186,0,67.48137,0,6],
+      ['SSEP','Top 50 | RF',72.26016,0,0.67798,0,58.68882,0,6],
+      ['SRPA','Top 50 | RF',77.10569,0,0.73604,0,73.12754,0,6],
+      ['DRL','Top 10 | 3DCNN',89.23221,2.28874,0.87709,0.02605,90.28127,2.03650,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | SVM',88.00000,0,0.86234,0,88.62531,0,5],
+      ['PCA','Top 50 | RF',77.75610,0,0.74331,0,66.81183,0,5],
+      ['SSEP','Top 50 | RF',72.16260,0,0.67716,0,59.12738,0,5],
+      ['SRPA','Top 50 | RF',79.70732,0,0.76632,0,76.25510,0,5],
+      ['DRL','Top 5 | 3DCNN',89.68936,1.29116,0.88232,0.01441,90.32600,0.83140,5],
+    ]
+  },
+  'Table 3: Pavia University': {
+    eda:[
+      ['No Band Sel.','All | SVM',93.99984,0,0.91993,0,92.44463,0,6],
+      ['PCA','Top 30 | 3DCNN',96.76756,0.69837,0.95742,0.00923,95.65978,1.01528,6],
+      ['SSEP','Top 30 | 3DCNN',96.52330,0.45014,0.95419,0.00603,95.91983,0.51070,6],
+      ['SRPA','Top 30 | 3DCNN',97.67556,0.68756,0.96930,0.00923,97.12742,0.37233,6],
+      ['DRL','Top 15 | 3DCNN',98.74950,0.35528,0.98357,0.00463,98.45787,0.18003,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | SVM',94.21024,0,0.92279,0,92.68430,0,5],
+      ['PCA','Top 45 | 3DCNN',97.25209,0.53157,0.96381,0.00708,96.10460,0.52814,4],
+      ['SSEP','Top 40 | 3DCNN',94.56193,0.53622,0.92863,0.00702,93.30829,1.84389,4],
+      ['SRPA','Top 25 | 3DCNN',96.94544,1.40042,0.95998,0.01805,96.80740,0.91192,4],
+      ['DRL','Top 15 | 3DCNN',99.02828,0.19182,0.98719,0.00254,98.86618,0.19941,4],
+    ]
+  },
+  'Table 4: Salinas': {
+    eda:[
+      ['No Band Sel.','All | RF',94.97506,0,0.94400,0,97.45286,0,6],
+      ['PCA','Top 30 | 3DCNN',94.09677,1.35266,0.93421,0.01524,97.11264,0.69149,6],
+      ['SSEP','Top 50 | RF',93.22003,0,0.92442,0,96.24324,0,6],
+      ['SRPA','Top 45 | RF',94.19299,0,0.93526,0,96.94377,0,6],
+      ['DRL','Top 50 | RF',95.01817,0,0.94447,0,97.48376,0,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | RF',95.01817,0,0.94448,0,97.50046,0,5],
+      ['PCA','Top 50 | RF',93.97130,0,0.93280,0,96.72665,0,5],
+      ['SSEP','Top 50 | RF',93.22618,0,0.92449,0,96.25363,0,5],
+      ['SRPA','Top 50 | RF',94.30384,0,0.93650,0,96.80049,0,5],
+      ['DRL','Top 10 | 3DCNN',95.50809,0.93366,0.94992,0.01052,97.78087,0.41718,5],
+    ]
+  },
+  'Table 5: Botswana': {
+    eda:[
+      ['No Band Sel.','All | SVM',92.10256,0,0.91446,0,92.95594,0,6],
+      ['PCA','Top 50 | SVM',91.17949,0,0.90445,0,92.34620,0,6],
+      ['SSEP','Top 40 | SVM',90.15385,0,0.89332,0,90.98707,0,6],
+      ['SRPA','Top 15 | 3DCNN',91.41880,4.30753,0.90689,0.04681,91.66791,4.38193,6],
+      ['DRL','Top 10 | 3DCNN',95.14530,1.54415,0.94740,0.01673,95.52634,1.42478,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | SVM',92.10256,0,0.91446,0,92.96451,0,5],
+      ['PCA','Top 50 | SVM',90.87179,0,0.90111,0,91.95942,0,5],
+      ['SSEP','Top 50 | SVM',90.25641,0,0.89446,0,91.20094,0,5],
+      ['SRPA','Top 10 | 3DCNN',93.35385,2.93466,0.92804,0.03174,93.81796,2.82458,5],
+      ['DRL','Top 15 | 3DCNN',93.78462,6.00443,0.93258,0.06520,94.05927,5.93444,5],
+    ]
+  },
+  'Table 6: KSC': {
+    eda:[
+      ['No Band Sel.','All | RF',92.19949,0,0.91311,0,88.36698,0,6],
+      ['PCA','Top 30 | RF',88.29923,0,0.86958,0,81.46361,0,6],
+      ['SSEP','Top 45 | RF',85.80563,0,0.84158,0,80.04564,0,6],
+      ['SRPA','Top 10 | 3DCNN',92.97459,0.77794,0.92174,0.00863,87.33442,1.66189,6],
+      ['DRL','Top 10 | 3DCNN',94.10634,1.55288,0.93441,0.01721,90.11496,2.51069,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | RF',92.96675,0,0.92163,0,88.97021,0,5],
+      ['PCA','Top 20 | 3DCNN',93.52979,0.80397,0.92790,0.00894,87.94740,1.46890,5],
+      ['SSEP','Top 45 | RF',86.06138,0,0.84440,0,80.42767,0,5],
+      ['SRPA','Top 20 | 3DCNN',94.10634,0.78066,0.93438,0.00869,89.72594,2.33276,5],
+      ['DRL','Top 5 | 3DCNN',93.70916,1.24253,0.92996,0.01387,88.89284,2.86576,5],
+    ]
+  },
+  'Table 7: Montana (UAV)': {
+    eda:[
+      ['No Band Sel.','All | HybridCNN',52.98246,1.13528,0.29422,0.01066,28.11269,4.11958,5],
+      ['PCA','Top 20 | 3DCNN',55.94599,4.49658,0.35544,0.06626,45.55892,9.10564,6],
+      ['SSEP','Top 20 | HybridCNN',56.37341,1.65973,0.34330,0.03154,34.48817,10.10797,6],
+      ['SRPA','Top 30 | 3DCNN',57.08978,5.73295,0.37449,0.08110,47.53207,10.72362,6],
+      ['DRL','Top 15 | 3DCNN',58.19143,4.96930,0.39170,0.06926,51.95623,9.81846,6],
+    ],
+    noeda:[
+      ['No Band Sel.','All | HybridCNN',54.21053,0.66516,0.30751,0.01101,27.19020,1.81770,5],
+      ['PCA','Top 50 | HybridCNN',54.21053,0.73391,0.30798,0.01210,27.63544,2.62209,5],
+      ['SSEP','Top 15 | HybridCNN',56.14035,0.53717,0.33680,0.00832,30.39113,1.49294,5],
+      ['SRPA','Top 40 | RF',52.83843,0,0.31193,0,39.66528,0,5],
+      ['DRL','Top 10 | HybridCNN',55.00000,0.50008,0.31842,0.00741,28.99950,1.49367,5],
+    ]
+  }
+};
+
+const T8 = {
+  eda: [
+    ['No Band Sel.',85.70448,16.20944,0.80797,0.25310,81.15774,26.22803],
+    ['PCA',        83.98042,15.25157,0.79383,0.22774,79.93709,20.17683],
+    ['SSEP',       82.38939,15.28699,0.77246,0.23178,76.06213,24.78085],
+    ['SRPA',       85.07624,15.43529,0.80729,0.22717,82.28885,19.18509],
+    ['DRL',        88.40716,15.11439,0.84644,0.22542,87.30340,17.67413],
+  ],
+  noeda:[
+    ['No Band Sel.',86.08471,15.80531,0.81220,0.24875,81.32250,26.71508],
+    ['PCA',         84.59860,16.35440,0.79615,0.25150,77.86422,26.95898],
+    ['SSEP',        82.06814,15.05962,0.76766,0.23078,75.11817,25.77071],
+    ['SRPA',        85.20920,16.99461,0.80619,0.25211,82.17870,22.19328],
+    ['DRL',         87.78658,16.34400,0.83340,0.25455,83.15411,26.82098],
+  ]
+};
+
+function fm(m,s){return s===0?m.toFixed(5):m.toFixed(5)+' ± '+s.toFixed(5)}
+function fk(v){return v.toFixed(5)}
+function delta(e,n,idx){
+  const d=(e[idx]-n[idx]);
+  const cls=Math.abs(d)<0.001?'zero':d>0?'pos':'neg';
+  const sign=d>0?'+':'';
+  return `<span class="${cls}">${sign}${d.toFixed(5)}</span>`;
+}
+
+function buildTable(tname, tdata){
+  const eda=tdata.eda, noeda=tdata.noeda;
+  const bestEDA=eda.reduce((b,r)=>r[2]>b[2]?r:b,eda[0])[0];
+  const bestNOEDA=noeda.reduce((b,r)=>r[2]>b[2]?r:b,noeda[0])[0];
+
+  let h=`<h2>${tname}</h2>
+  <p class="subtitle">Mean ± std over 5 independent runs. Best OA per condition highlighted.</p>`;
+
+  // EDA table
+  h+=`<div class="section-label">With EDA</div>
+  <table><thead><tr>
+    <th style="width:14%">Technique</th>
+    <th style="width:16%">Configuration</th>
+    <th style="width:22%">OA (%)</th>
+    <th style="width:18%">Kappa</th>
+    <th style="width:22%">F1 (%)</th>
+    <th style="width:8%">Runs</th>
+  </tr></thead><tbody>`;
+  for(const r of eda){
+    const best=r[0]===bestEDA;
+    h+=`<tr${best?' class="best"':''}>
+      <td>${r[0]}</td><td>${r[1]}</td>
+      <td>${fm(r[2],r[3])}</td>
+      <td>${fm(r[4],r[5])}</td>
+      <td>${fm(r[6],r[7])}</td>
+      <td>${r[8]}</td>
+    </tr>`;
+  }
+  h+=`</tbody></table>`;
+
+  // NoEDA table with delta
+  h+=`<div class="section-label" style="margin-top:12px">Without EDA &amp; Delta (EDA − No-EDA)</div>
+  <table><thead><tr>
+    <th style="width:14%">Technique</th>
+    <th style="width:16%">Configuration</th>
+    <th style="width:22%">OA (%)</th>
+    <th style="width:14%">Kappa</th>
+    <th style="width:18%">F1 (%)</th>
+    <th style="width:16%">ΔOA / ΔKappa / ΔF1</th>
+  </tr></thead><tbody>`;
+  for(let i=0;i<noeda.length;i++){
+    const r=noeda[i];const e=eda[i];
+    const best=r[0]===bestNOEDA;
+    const doa=delta(e,r,2),dk=delta(e,r,4),df=delta(e,r,6);
+    h+=`<tr${best?' class="best"':''}>
+      <td>${r[0]}</td><td>${r[1]}</td>
+      <td>${fm(r[2],r[3])}</td>
+      <td>${fm(r[4],r[5])}</td>
+      <td>${fm(r[6],r[7])}</td>
+      <td>${doa} / ${dk} / ${df}</td>
+    </tr>`;
+  }
+  h+=`</tbody></table>`;
+  return h;
+}
+
+function buildT8(){
+  let h=`<h2>Table 8: Cross-Dataset Aggregated</h2>
+  <p class="subtitle">Per-dataset best-config OA/Kappa/F1 averaged across all 6 datasets. Mean ± std over those 6 per-dataset values.</p>`;
+
+  for(const [label,rows] of [['With EDA',T8.eda],['Without EDA',T8.noeda]]){
+    const bestOA=rows.reduce((b,r)=>r[1]>b[1]?r:b,rows[0])[0];
+    h+=`<div class="section-label" style="margin-top:${label==='Without EDA'?'12px':'0'}">${label}</div>
+    <table><thead><tr>
+      <th style="width:16%">Technique</th>
+      <th style="width:28%">OA (%) across datasets</th>
+      <th style="width:28%">Kappa</th>
+      <th style="width:28%">F1 (%)</th>
+    </tr></thead><tbody>`;
+    for(const r of rows){
+      const best=r[0]===bestOA;
+      h+=`<tr${best?' class="best"':''}>
+        <td>${r[0]}</td>
+        <td>${fm(r[1],r[2])}</td>
+        <td>${fm(r[3],r[4])}</td>
+        <td>${fm(r[5],r[6])}</td>
+      </tr>`;
+    }
+    h+=`</tbody></table>`;
+  }
+  return h;
+}
+
+const nav=document.getElementById('nav');
+const content=document.getElementById('content');
+const allTables={...DATA,'Table 8: Cross-Dataset':null};
+const keys=Object.keys(allTables);
+
+keys.forEach((k,i)=>{
+  const btn=document.createElement('button');
+  btn.textContent='T'+(i+2<=8?i+2:'8')+': '+(k.split(':')[1]||'').trim().split(' ').slice(0,2).join(' ');
+  btn.onclick=()=>{
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    content.innerHTML=k==='Table 8: Cross-Dataset'?buildT8():buildTable(k,DATA[k]);
+  };
+  if(i===0)btn.classList.add('active');
+  nav.appendChild(btn);
+});
+
+// Init first tab
+content.innerHTML=buildTable(keys[0],DATA[keys[0]]);
+</script>
