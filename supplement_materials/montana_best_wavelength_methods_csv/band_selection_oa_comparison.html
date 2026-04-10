@@ -1,0 +1,122 @@
+
+<style>
+  .wrap { padding: 1rem 0; font-size: 13px; color: var(--color-text-primary); }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); text-align: left; }
+  td { padding: 7px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .bold { font-weight: 500; }
+  .muted { color: var(--color-text-secondary); font-size: 12px; }
+  .highlight { background: var(--color-background-info); }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+  .badge-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .badge-ok { background: var(--color-background-success); color: var(--color-text-success); }
+  .badge-info { background: var(--color-background-info); color: var(--color-text-info); }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); padding: 10px 8px 4px; letter-spacing: 0.03em; }
+  .note { font-size: 11px; color: var(--color-text-secondary); margin-top: 12px; line-height: 1.6; }
+  .col-method { width: 18%; }
+  .col-dataset { width: 14%; }
+  .col-bands { width: 10%; }
+  .col-classifier { width: 12%; }
+  .col-train { width: 10%; }
+  .col-oa { width: 14%; }
+  .col-source { width: 22%; }
+</style>
+<div class="wrap">
+  <h2 style="font-size: 15px; font-weight: 500; margin: 0 0 14px;">OA comparison — verified numbers from source papers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="col-method">Method</th>
+        <th class="col-dataset">Dataset</th>
+        <th class="col-bands">Bands (K)</th>
+        <th class="col-classifier">Classifier</th>
+        <th class="col-train">Training</th>
+        <th class="col-oa">OA (%)</th>
+        <th class="col-source">Source / Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="7" class="section-label">Indian Pines</td></tr>
+
+      <tr>
+        <td class="bold">BS-Net-Conv</td>
+        <td>Indian Pines</td>
+        <td>25</td>
+        <td>SVM</td>
+        <td>5%</td>
+        <td class="bold">70.61 ± 2.56</td>
+        <td>Cai 2020, Table V <span class="badge badge-ok">verified</span></td>
+      </tr>
+      <tr>
+        <td class="bold">BS-Net-FC</td>
+        <td>Indian Pines</td>
+        <td>25</td>
+        <td>SVM</td>
+        <td>5%</td>
+        <td>63.39 ± 3.05</td>
+        <td>Cai 2020, Table V <span class="badge badge-ok">verified</span></td>
+      </tr>
+      <tr>
+        <td class="bold">DRL (Mou)</td>
+        <td>Indian Pines</td>
+        <td>30</td>
+        <td>SVM-RBF</td>
+        <td>10%</td>
+        <td class="bold">78.26 ± 1.54</td>
+        <td>Mou 2022, Table III <span class="badge badge-ok">verified</span></td>
+      </tr>
+      <tr class="highlight">
+        <td class="bold">DRL (ours)</td>
+        <td>Indian Pines</td>
+        <td>10</td>
+        <td>3D-CNN</td>
+        <td>70/30</td>
+        <td class="bold">89.23 ± 2.29</td>
+        <td>This work, Table 2 <span class="badge badge-info">our result</span></td>
+      </tr>
+
+      <tr><td colspan="7" class="section-label">Pavia University</td></tr>
+
+      <tr>
+        <td class="bold">BS-Net-FC</td>
+        <td>Pavia Univ.</td>
+        <td>15</td>
+        <td>SVM</td>
+        <td>5%</td>
+        <td class="bold">89.29 ± —</td>
+        <td>Cai 2020, Table VI <span class="badge badge-ok">verified</span></td>
+      </tr>
+      <tr>
+        <td class="bold">BS-Net-Conv</td>
+        <td>Pavia Univ.</td>
+        <td>15</td>
+        <td>SVM</td>
+        <td>5%</td>
+        <td>comparable to FC</td>
+        <td>Cai 2020, Table VI <span class="badge badge-warn">no single OA cited</span></td>
+      </tr>
+      <tr>
+        <td class="bold">DRL (Mou)</td>
+        <td>Pavia Univ.</td>
+        <td>30</td>
+        <td>SVM-RBF</td>
+        <td>10%</td>
+        <td class="bold">92.96 ± 0.58</td>
+        <td>Mou 2022, Table IV <span class="badge badge-ok">verified</span></td>
+      </tr>
+      <tr class="highlight">
+        <td class="bold">DRL (ours)</td>
+        <td>Pavia Univ.</td>
+        <td>15</td>
+        <td>3D-CNN</td>
+        <td>70/30</td>
+        <td class="bold">98.75 ± 0.36</td>
+        <td>This work, Table 3 <span class="badge badge-info">our result</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="note"><span style="font-weight:500;">Key caveat:</span> Direct OA comparison is not fully fair — training split (70/30 vs 5–10%) and classifier (3D-CNN vs SVM) differ substantially across studies. Higher training data in our protocol directly inflates absolute OA. Method-level trends (DRL &gt; statistical) are consistent across protocols.</p>
+  <p class="note"><span style="font-weight:500;">Flagged entry:</span> BS-Net-Conv on Pavia University — Cai 2020 Table VI does not present a single clean OA for this variant under SVM; cite BS-Net-FC (89.29%) only, or refer readers to the original table.</p>
+</div>
