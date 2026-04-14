@@ -20,7 +20,7 @@ This repository provides the complete, reproducible experimental framework for t
 | DRL | Learning-based | Deep Reinforcement Learning sequential band selection |
 | KMCBS | Clustering-based | K-Means Clustering-Based Band Selection (centroid representative) |
 
-**Classifiers evaluated:** Random Forest (RF), SVM (RBF), K-Nearest Neighbours (KNN), 3D-CNN, Hybrid-CNN
+**Classifiers evaluated:** Random Forest (RF), SVM (RBF), K-Nearest Neighbours (KNN), 3D-CNN
 
 ---
 
@@ -227,13 +227,11 @@ python experiments/run_class_imbalance.py
 If you use this code or the Montana dataset, please cite:
 
 ```bibtex
-@article{karankot2025hsi,
-  title   = {Hyperspectral Band Selection for Ground Fuel Classification
-             for Prescribed Fires},
-  author  = {Karankot, Shamana and others},
-  journal = {Remote Sensing},
-  year    = {2025},
-  note    = {Under review}
+@article{karankot2026hyperspectral,
+  title={Hyperspectral Band Selection for Ground Fuel Classification for Prescribed Fires},
+  author={Karankot, Mahmad Isaq and Glenn, Ethan M and Masood, Muhammad Umer and Zhou, Xiaobing and Whitaker, Bradley M},
+  year={2026},
+  publisher={Preprints}
 }
 ```
 
