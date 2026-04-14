@@ -1,183 +1,78 @@
 # Hyperspectral Band Selection for Ground Fuel Classification for Prescribed Fires
 
-
-**“Hyperspectral Band Selection for Ground Fuel Classification for Prescribed Fires”**  
-Submitted to *Remote Sensing (MDPI)*
-
----
-
-## Abstract
-
-This repository provides the complete experimental framework for evaluating hyperspectral band selection strategies for ground fuel classification in prescribed fire environments. The study investigates how dimensionality reduction and band ranking techniques influence classification performance across benchmark hyperspectral datasets and UAV-based VNIR imagery collected from prescribed burn sites.
-
-We systematically compare:
-
-- PCA (unsupervised variance ranking)
-- SSEP (Spatial-Spectral Edge Preservation)
-- SRPA (Spectral-Redundancy Penalized Attention)
-- DRL-based sequential band selection
-
-under both:
-
-- **With Exploratory Data Analysis (EDA)**
-- **Without EDA (No-EDA baseline)**
-
-Classification performance is evaluated using:
-
-- Random Forest (RF)
-- Support Vector Machine (SVM)
-- K-Nearest Neighbors (KNN)
-- 3D Convolutional Neural Network (3D-CNN)
+**Paper:** *"Hyperspectral Band Selection for Ground Fuel Classification for Prescribed Fires"*  
+**Journal:** Remote Sensing (MDPI) — under review  
+**Institution:** Montana State University, BMW Lab
 
 ---
 
-## Research Objectives
+## Overview
 
-This repository reproduces experiments addressing:
+This repository provides the complete, reproducible experimental framework for the paper. We evaluate five hyperspectral band selection strategies across six datasets including a novel UAV VNIR dataset collected over prescribed burn sites in Montana, USA.
 
-1. How does EDA influence hyperspectral classification performance?
-2. Which band selection strategy provides the best accuracy–efficiency trade-off?
-3. How stable are selected bands across datasets?
-4. How does performance vary with top-k band subsets (k = 5–50)?
+**Band selection methods evaluated:**
 
----
+| Method | Type | Description |
+|--------|------|-------------|
+| PCA | Variance-based | Ranks bands by contribution to principal components |
+| SSEP | Edge-aware | Spatial-Spectral Edge Preservation via Dice similarity to GT edges |
+| SRPA | Attention-based | Spectral-Redundancy Penalized Attention with SE block |
+| DRL | Learning-based | Deep Reinforcement Learning sequential band selection |
+| KMCBS | Clustering-based | K-Means Clustering-Based Band Selection (centroid representative) |
 
-## Datasets
-
-The framework supports:
-
-- Indian Pines
-- Pavia University
-- Salinas
-- Botswana
-- Kennedy Space Center (KSC)
-- Montana UAV VNIR dataset (prescribed burn imagery)
-
-The Montana dataset includes UAV-collected VNIR hyperspectral cubes for ground fuel classification under prescribed fire conditions.
-
----
-
-## Experimental Pipeline
-
-The workflow implemented in this repository follows the unified architecture described in the manuscript.
-
-### 1. Dataset Loading
-
-Raw hyperspectral cubes are loaded and prepared for analysis.
-
-
-
-### 2. Exploratory Data Analysis (Optional)
-
-When enabled, the EDA pipeline performs:
-
-- Noisy band detection  
-- Zero-value fraction analysis  
-- Percentile clipping (Montana UAV VNIR)  
-- Min–max normalization  
-
-When disabled, raw data proceeds directly to modeling (No-EDA baseline).
-
-### 3. Band Selection
-
-The following ranking strategies are implemented:
-
-- **PCA** – Variance-based unsupervised ranking  
-- **SSEP** – Edge-guided Dice-based ranking  
-- **SRPA** – Attention-based ranking with redundancy penalty  
-- **DRL** – Sequential band selection via reinforcement learning  
-
-Each method produces:
-
-- Ranked band list  
-- Top-k subsets (k = 5–50)
-
-### 4. Classification
-
-Selected band subsets are evaluated using:
-
-- Random Forest (pixel-based)  
-- SVM (pixel-based)  
-- KNN (pixel-based)  
-- 3D-CNN (patch-based spatial-spectral modeling)
-
-### 5. Evaluation Metrics
-
-Performance metrics include:
-
-- Overall Accuracy (OA)  
-- Cohen’s Kappa  
-- Macro-F1 score  
-- Confusion matrices  
-- Δ performance (With-EDA − No-EDA)
+**Classifiers evaluated:** Random Forest (RF), SVM (RBF), K-Nearest Neighbours (KNN), 3D-CNN, Hybrid-CNN
 
 ---
 
 ## Repository Structure
+
 ```
-hyperspectral-band-selection-prescribed-fires/
+hyperspectral-feature-selection-prescribed-fires/
 │
 ├── README.md
 ├── requirements.txt
 ├── LICENSE
 │
-├── configs/
-│   ├── default.yaml
-│   ├── eda_config.yaml
-│   └── model_config.yaml
-│
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── metadata/
+│   ├── raw/                     ← Place original .mat / .tif files here
+│   └── processed/               ← Cleaned .npy files (produced by EDA scripts)
 │
-
 ├── src/
+│   ├── hsi_config.py            ← Dataset paths and experiment parameters
+│   ├── hsi_data.py              ← Data loading: pixel extraction, patch extraction
+│   ├── band_selection.py        ← Band order loading and cube slicing utilities
+│   ├── train_models.py          ← Classifier training wrappers (RF, SVM, KNN, CNN)
+│   │
 │   ├── eda/
-│   │   ├── eda_pipeline.py
-│   │   ├── noisy_band_detection.py
-│   │   ├── normalization.py
-│   │   └── percentile_clipping.py
+│   │   ├── hsi_eda.py           ← EDA + cleaning for .mat benchmark datasets
+│   │   └── hsi_clean_from_mat_or_tif.py  ← EDA for UAV VNIR .tif + CSV datasets
 │   │
 │   ├── band_selection/
-│   │   ├── pca.py
-│   │   ├── ssep.py
-│   │   ├── srpa.py
-│   │   └── drl.py
+│   │   ├── generic_pca_band_selection.py   ← PCA band scoring
+│   │   ├── generic_ssep_band_selection.py  ← SSEP (Sobel + Dice) band scoring
+│   │   ├── generic_srpa_band_selection.py  ← SRPA (SE attention + redundancy) scoring
+│   │   ├── generic_drl_band_selection.py   ← DRL (policy gradient) band selection
+│   │   └── generic_kmcbs_band_selection.py ← KMCBS (K-Means clustering) band selection
 │   │
-│   ├── training/
-│   │   ├── rf.py
-│   │   ├── svm.py
-│   │   ├── knn.py
-│   │   └── cnn3d.py
+│   ├── models/
+│   │   └── models_deep.py       ← 3D-CNN, Hybrid CNN, GCN, GAT architectures
 │   │
-|   ├── datasets/
-|   |
-|   ├── utils/
-|   |
-|   |
-│   ├── evaluation/
-│   │   ├── metrics.py
-│   │   ├── confusion_matrix.py
-│   │   └── comparison.py
-│   │
-│   └── main.py
+│   └── utils/
+│       └── logger_utils.py      ← CSV results logger
 │
 ├── experiments/
-│   ├── run_full_experiment.py
-│   └── run_ablation.py
+│   ├── run_full_hsi_pipeline.py      ← Main experiment: all datasets × methods × classifiers
+│   ├── run_kmeans_band_selection.py  ← KMCBS classification experiment
+│   ├── run_patch_sensitivity.py      ← Patch size sensitivity (3×3, 5×5, 7×7)
+│   ├── run_ablation.py               ← Ablation study (SRPA penalty, DRL vs random)
+│   ├── run_hyperparam_sensitivity.py ← Hyperparameter sensitivity (SSEP σ, SRPA λ)
+│   └── run_class_imbalance.py        ← Class imbalance analysis (Montana only)
 │
-├── outputs/
-│   ├── band_scores/
-│   ├── metrics/
-│   ├── plots/
-│   └── logs/
-│
-└── notebooks/
-    ├── exploratory_analysis.ipynb
-    ├── band_ranking_visualization.ipynb
-    └── results_summary.ipynb
-
+└── outputs/
+    ├── results/                 ← CSV result files (auto-created)
+    ├── band_scores/             ← Band order .npy files (auto-created by band selection)
+    ├── plots/                   ← Band score plots
+    └── logs/                    ← Training logs
 ```
 
 ---
@@ -185,59 +80,171 @@ hyperspectral-band-selection-prescribed-fires/
 ## Installation
 
 ```bash
-git clone https://github.com/BMW-lab-MSU/hyperspectral-feature-selection-prescribed-firess.git
-cd hyperspectral-band-selection-prescribed-fires
+git clone https://github.com/BMW-lab-MSU/hyperspectral-feature-selection-prescribed-fires.git
+cd hyperspectral-feature-selection-prescribed-fires
 pip install -r requirements.txt
 ```
+
+**GPU support (recommended for 3D-CNN):** Install PyTorch with CUDA from https://pytorch.org/get-started
+
 ---
 
-## Running Experiments
-### Run with EDA:
-```
-python src/main.py --dataset indian_pines --eda True --method SRPA --topk 20
-```
----
 ## Data Setup
 
-After downloading datasets, place them under:
+### Step 1 — Download benchmark datasets
 
-data/processed/
+Place the original `.mat` files in `data/raw/`:
 
-Expected filenames:
+| Dataset | File | Source |
+|---------|------|--------|
+| Indian Pines | `Indian_pines_corrected.mat`, `Indian_pines_gt.mat` | [EHU](http://www.ehu.eus/ccwintco/index.php/Hyperspectral_Remote_Sensing_Scenes) |
+| Pavia University | `PaviaU.mat`, `PaviaU_gt.mat` | [EHU](http://www.ehu.eus/ccwintco/index.php/Hyperspectral_Remote_Sensing_Scenes) |
+| Salinas | `Salinas_corrected.mat`, `Salinas_gt.mat` | [EHU](http://www.ehu.eus/ccwintco/index.php/Hyperspectral_Remote_Sensing_Scenes) |
+| Botswana | `Botswana.mat`, `Botswana_gt.mat` | [EHU](http://www.ehu.eus/ccwintco/index.php/Hyperspectral_Remote_Sensing_Scenes) |
+| KSC | `KSC_corrected.mat`, `KSC_gt.mat` | [EHU](http://www.ehu.eus/ccwintco/index.php/Hyperspectral_Remote_Sensing_Scenes) |
 
-- paviaU_clean.npy
-- paviaU_gt.npy
-- indian_pines_clean.npy
-- indian_pines_gt.npy
-- ...
+**Montana UAV VNIR dataset:** 97 GB UAV-collected VNIR cube from the Lubrecht Experimental Forest prescribed burn site. Available upon reasonable request (NSF SMART FIRES project). Contact the authors.
 
-Each dataset must contain:
-- Clean hyperspectral cube: (H, W, B)
-- Ground truth map: (H, W)
+### Step 2 — Run EDA and preprocessing
 
-Band selection order files must exist in the project root:
+For benchmark `.mat` datasets:
 
-{dataset}_{method}_band_selection_results/
-    {dataset}_{method}_order.npy
+```bash
+# Edit DATASET_NAME in the script, then run:
+python src/eda/hsi_eda.py
+```
 
-  ---
-  ## Reproducibility
+For Montana UAV VNIR `.tif` + CSV labels:
 
-- Fixed random seeds for all experiments
-- Stratified train/test split
-- Band order files generated once per dataset
-- All results logged to:
+```bash
+python src/eda/hsi_clean_from_mat_or_tif.py
+```
 
-outputs/aggregated/all_runs.csv
+Each script produces two files in `data/processed/`:
+- `{dataset}_clean.npy` — normalised hyperspectral cube (H, W, B) float32
+- `{dataset}_gt.npy` — ground truth map (H, W) int16
 
-Each row corresponds to one dataset–method–model–topk configuration.
----
-## Data Availability
+### Step 3 — Update paths in hsi_config.py
 
-Public benchmark datasets (Indian Pines, Pavia University, Salinas, Botswana, KSC)
-are available from their respective repositories.
+Edit `src/hsi_config.py` to point `cube_path` and `gt_path` to your processed files.
 
-The Montana UAV VNIR dataset (97GB) is part of the NSF SMART FIRES project and
-is available upon reasonable request.
 ---
 
+## Reproducing the Paper
+
+### Step 1 — Run band selection (one script per method per dataset)
+
+Edit the `CONFIG` block at the top of each script, then run:
+
+```bash
+# PCA
+python src/band_selection/generic_pca_band_selection.py
+
+# SSEP
+python src/band_selection/generic_ssep_band_selection.py
+
+# SRPA
+python src/band_selection/generic_srpa_band_selection.py
+
+# DRL
+python src/band_selection/generic_drl_band_selection.py
+
+# KMCBS
+python src/band_selection/generic_kmcbs_band_selection.py
+```
+
+Each script saves `{dataset}_{method}_order.npy` — the ranked band indices.
+
+### Step 2 — Run the main classification pipeline (Tables 2–8)
+
+```bash
+python experiments/run_full_hsi_pipeline.py
+```
+
+This loops over all datasets, all band selection methods, all Top-K values [5–50], and all classifiers. Results are written to `outputs/results/hsi_all_results.csv`.
+
+**Expected runtime:** 12–24 hours on GPU for all datasets × methods × classifiers.
+
+### Step 3 — Run reviewer response experiments
+
+```bash
+# KMCBS comparison (Table 10)
+python experiments/run_kmeans_band_selection.py
+
+# Patch size sensitivity (Table 11) — Comment 3
+python experiments/run_patch_sensitivity.py
+
+# Ablation study (Table 12) — Comment 5
+python experiments/run_ablation.py
+
+# Hyperparameter sensitivity (Tables 13-14) — Comment 1
+python experiments/run_hyperparam_sensitivity.py
+
+# Class imbalance analysis (Table 15) — Comment 2
+python experiments/run_class_imbalance.py
+```
+
+---
+
+## Experimental Protocol
+
+- **Train/validation split:** 70/30 stratified by class
+- **Runs per configuration:** 5 independent runs with seeds 0–4
+- **Reported metric:** Mean ± std over 5 runs
+- **Patch size:** 5×5 (default), varied in sensitivity analysis
+- **EDA condition:** noisy band removal + min-max normalisation per band
+- **No-EDA condition:** min-max normalisation only (no band removal)
+
+---
+
+## Key Results Summary
+
+| Dataset | Best Method | Best Classifier | Best OA (%) |
+|---------|-------------|-----------------|-------------|
+| Indian Pines | DRL | 3D-CNN | 89.23 ± 2.29 |
+| Pavia University | DRL | 3D-CNN | 98.75 ± 0.36 |
+| Salinas | KMCBS | 3D-CNN | 95.55 ± 0.51 |
+| Botswana | KMCBS | 3D-CNN | 95.90 ± 1.32 |
+| KSC | KMCBS | 3D-CNN | 94.68 ± 0.71 |
+| Montana UAV VNIR | DRL | 3D-CNN | 58.19 ± 4.97 |
+
+---
+
+## Known Issues and Notes
+
+**paviaU capitalisation:** All files and folders for the Pavia University dataset use capital U (`paviaU`), not lowercase. The `band_selection.py` utility preserves the original case of dataset names to avoid file-not-found errors.
+
+**Montana large cube:** The Montana UAV VNIR cube is 10,706 × 8,360 × 211 pixels (≈97 GB). Memory-safe loading via `np.load(..., mmap_mode='r')` and pixel subsampling (50,000 pixels) is used throughout. Minimum recommended RAM: 32 GB.
+
+**SMOTE on Montana:** SMOTE synthetic oversampling could not be applied to Montana because the most minority class (Dead Ponderosa Pine, 30 pixels) produces a sixth background class label after stratified splitting, causing k-neighbors to be 0. Class weighting and focal loss are used instead.
+
+**DRL reward function:** The DRL implementation uses pure classification accuracy as the reward (no compactness penalty λ). The reward equation in the paper has been corrected to reflect this.
+
+---
+
+## Citation
+
+If you use this code or the Montana dataset, please cite:
+
+```bibtex
+@article{karankot2025hsi,
+  title   = {Hyperspectral Band Selection for Ground Fuel Classification
+             for Prescribed Fires},
+  author  = {Karankot, Shamana and others},
+  journal = {Remote Sensing},
+  year    = {2025},
+  note    = {Under review}
+}
+```
+
+---
+
+## Acknowledgements
+
+This material is based upon work supported in part by the National Science Foundation EPSCoR Cooperative Agreement OIA-2242802 (NSF SMART FIRES project). Computational efforts were performed on the Tempest High Performance Computing System at Montana State University (RRID:SCR 026229).
+
+---
+
+## License
+
+MIT License. See LICENSE file for details.
